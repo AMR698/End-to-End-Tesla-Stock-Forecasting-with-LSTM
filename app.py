@@ -10,14 +10,12 @@ from tensorflow.keras.callbacks import EarlyStopping
 import joblib
 import os
 
-# ─── Page Config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Tesla Stock Forecasting",
     page_icon="🚗",
     layout="wide"
 )
 
-# ─── Custom CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
     .main { background-color: #0e1117; }
@@ -51,12 +49,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ─── Header ────────────────────────────────────────────────────────────────────
 st.markdown('<p class="title-text">🚗 Tesla Stock Forecasting using LSTM</p>', unsafe_allow_html=True)
 st.markdown("**تنبؤ بأسعار سهم Tesla باستخدام نموذج LSTM**")
 st.divider()
 
-# ─── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Tesla_Motors.svg/320px-Tesla_Motors.svg.png", width=150)
     st.markdown("## ⚙️ الإعدادات")
@@ -74,7 +70,6 @@ with st.sidebar:
     st.markdown("### 📌 معلومات")
     st.info("**RMSE:** 144.59\n\n**MAPE:** 18.70%\n\n**Dataset:** 2956 يوم تداول\n\n**الفترة:** 2010 → 2021")
 
-# ─── Helper Functions ──────────────────────────────────────────────────────────
 @st.cache_data
 def load_data(file):
     df = pd.read_csv(file)
@@ -103,7 +98,6 @@ def create_sequences(data, look_back):
         y.append(data[i, 0])
     return np.array(X), np.array(y)
 
-# ─── Main Logic ────────────────────────────────────────────────────────────────
 if uploaded_file is None:
     st.warning("👈 ارفع ملف CSV من الـ Sidebar عشان تبدأ — الملف المطلوب هو `TSLA.csv` من Kaggle")
     
@@ -120,7 +114,6 @@ if uploaded_file is None:
     st.dataframe(sample, use_container_width=True)
     st.stop()
 
-# ─── Load & Show Data ──────────────────────────────────────────────────────────
 data = load_data(uploaded_file)
 
 st.markdown("## 📊 استكشاف البيانات")
@@ -145,11 +138,9 @@ with col4:
 
 st.markdown("---")
 
-# ─── Raw Data Table ────────────────────────────────────────────────────────────
 with st.expander("📋 عرض البيانات الخام"):
     st.dataframe(data.tail(20), use_container_width=True)
 
-# ─── Price Chart ───────────────────────────────────────────────────────────────
 st.markdown("### 📈 سعر سهم Tesla عبر الزمن")
 fig1 = go.Figure()
 fig1.add_trace(go.Scatter(x=data['Date'], y=data['Open'],  name='Open',  line=dict(color='purple', width=1)))
@@ -165,7 +156,6 @@ fig1.update_layout(
 )
 st.plotly_chart(fig1, use_container_width=True)
 
-# ─── Volume Chart ──────────────────────────────────────────────────────────────
 with st.expander("📊 حجم التداول"):
     fig_vol = go.Figure()
     fig_vol.add_trace(go.Bar(x=data['Date'], y=data['Volume'], name='Volume', marker_color='#e50914', opacity=0.7))
@@ -174,7 +164,6 @@ with st.expander("📊 حجم التداول"):
 
 st.divider()
 
-# ─── Train Model ───────────────────────────────────────────────────────────────
 st.markdown("## 🧠 تدريب الموديل")
 
 if st.button("🚀 ابدأ التدريب والتنبؤ"):
@@ -232,7 +221,6 @@ if st.button("🚀 ابدأ التدريب والتنبؤ"):
         rmse = np.sqrt(mean_squared_error(y_test_inv, predictions))
         mape = np.mean(np.abs((y_test_inv - predictions) / y_test_inv)) * 100
 
-    # ─── Results Metrics ───────────────────────────────────────────────────────
     st.markdown("## 📊 نتائج الموديل")
     c1, c2, c3 = st.columns(3)
     with c1:
@@ -251,7 +239,6 @@ if st.button("🚀 ابدأ التدريب والتنبؤ"):
 
     st.markdown("---")
 
-    # ─── Prediction Chart ──────────────────────────────────────────────────────
     st.markdown("### 📉 السعر الحقيقي vs التنبؤ")
     test_dates = data['Date'].iloc[train_size:].reset_index(drop=True)
 
@@ -269,7 +256,6 @@ if st.button("🚀 ابدأ التدريب والتنبؤ"):
     )
     st.plotly_chart(fig2, use_container_width=True)
 
-    # ─── Save Model ────────────────────────────────────────────────────────────
     st.markdown("### 💾 حفظ الموديل")
     model.save("stock_model.keras")
     joblib.dump(scaler, "scaler.pkl")
@@ -282,6 +268,5 @@ if st.button("🚀 ابدأ التدريب والتنبؤ"):
         with open("scaler.pkl", "rb") as f:
             st.download_button("⬇️ تحميل الـ Scaler (.pkl)", f, "scaler.pkl", use_container_width=True)
 
-# ─── Footer ────────────────────────────────────────────────────────────────────
 st.divider()
 st.markdown("<center style='color:#555'>Tesla Stock Forecasting — LSTM Model | Built with Streamlit 🚀</center>", unsafe_allow_html=True)
